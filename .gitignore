@@ -1,0 +1,18 @@
+# --- .NET Build Output & Visual Studio ---
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.userosscache
+*.suo
+.dotnet/
+.duğ/
+
+# --- Konfigurasi Lokal & Secret ---
+appsettings.Development.json
+.env
+.env.local
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
