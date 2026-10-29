@@ -6,23 +6,27 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. TAMBAHKAN LAYANAN SWAGGER DI SINI
+// 1. Tambahkan Layanan Controller & API Explorer
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// 2. Konfigurasi CORS untuk Vercel
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowVercelFrontend", policy =>
     {
-        policy.WithOrigins("https://personalfinance-tau.vercel.app") // Ganti dengan URL Vercel Anda
+        policy.WithOrigins("https://personalfinance-tau.vercel.app")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
-// Konfigurasi JWT Authentication
+// 3. Konfigurasi JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["Secret"] ?? "KunciRahasiaJWTSuperAmanDanPanjangMinimal32Karakter";
+var issuer = jwtSettings["Issuer"] ?? "PersonalFinanceAPI";
+var audience = jwtSettings["Audience"] ?? "PersonalFinanceClient";
 
 builder.Services.AddAuthentication(options =>
 {
@@ -37,13 +41,13 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
+        ValidIssuer = issuer,
+        ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
 });
 
-builder.Services.AddControllers();
+// 4. Konfigurasi Database SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -52,20 +56,21 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 var app = builder.Build();
 
+// 5. Urutan Middleware (PENTING: CORS harus di paling atas sebelum request diproses)
 app.UseCors("AllowVercelFrontend");
 
-// 2. AKTIFKAN SWAGGER DI PIPELINE (Tanpa batasan IsDevelopment)
+// Middleware File Statis & Swagger
+app.UseStaticFiles();
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "PersonalFinanceAPI v1");
-    // Opsional: Baris di bawah ini membuat halaman Swagger langsung terbuka di root URL (/)
-    // c.RoutePrefix = string.Empty; 
+    c.RoutePrefix = "swagger";
 });
 
 app.UseHttpsRedirection();
 
-// Wajib diletakkan sebelum UseAuthorization
 app.UseAuthentication(); 
 app.UseAuthorization();
 

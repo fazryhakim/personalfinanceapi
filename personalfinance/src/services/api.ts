@@ -1,5 +1,5 @@
 // Menggunakan API_URL (tanpa NEXT_PUBLIC_)
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://personalfinance-api.runasp.net/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://personalfinance-api.runasp.net';
 
 // --- HELPER AUTH & SAFE JSON PARSER ---
 function getAuthHeaders() {
