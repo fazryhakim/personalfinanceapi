@@ -12,11 +12,11 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowVercelFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.WithOrigins("https://personalfinance-tau.vercel.app") // Ganti dengan URL Vercel Anda
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
@@ -52,7 +52,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
+app.UseCors("AllowVercelFrontend");
 
 // 2. AKTIFKAN SWAGGER DI PIPELINE (Tanpa batasan IsDevelopment)
 app.UseSwagger();
